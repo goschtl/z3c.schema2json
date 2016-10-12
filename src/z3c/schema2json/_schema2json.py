@@ -35,11 +35,31 @@ def serialize(schema, instance, encoding='UTF-8',
         indent = None
     return json.dumps(json_dict, sort_keys=True, indent=indent)
 
+
+class DeserializationError(TypeError):
+    """Deserialization did not succeed.
+
+    The attribute `field_errors` contains a dictionary mapping each field for
+    which an exception occured to the corresponding exception and element.
+
+    """
+
+    def __init__(self, field_errors):
+        self.field_errors = field_errors
+
+
 def deserialize_from_dict(container, schema, instance):
+    errors = {}
     for key, value in container.iteritems():
-        field = schema[key]
-        value = IJSONGenerator(field).input(value)
-        field.set(instance, value)
+        try:
+            field = schema[key]
+            value = IJSONGenerator(field).input(value)
+            field.set(instance, value)
+        except Exception, v:
+            errors[field] = (v, key)
+    if errors:
+        raise DeserializationError(errors)
+
 
 def deserialize(JSON, schema, instance):
     obj_dict = json.loads(JSON)
