@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.0.0dev'
+version = '0.1'
 
 setup(name='z3c.schema2json',
       version=version,
